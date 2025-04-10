@@ -1,0 +1,114 @@
+{
+    "service_type": "gemini",
+    "auto_tag_on_add": false,
+    "auto_tag_on_edit": false,
+    "tag_prefix": "ai:",
+    "max_tags_per_card": 5,
+    "minimum_confidence": 0.7,
+    "use_field_hints": true,
+    "log_enabled": true,
+    "log_level": "INFO",
+    "openai": {
+        "api_key": "",
+        "language_model": "gpt-3.5-turbo",
+        "max_tokens": 100,
+        "temperature": 0.7,
+        "top_p": 1.0,
+        "presence_penalty": 0,
+        "frequency_penalty": 0,
+        "api_base": "https://api.openai.com/v1",
+        "timeout": 30,
+        "organization_id": ""
+    },
+    "azure_openai": {
+        "api_key": "",
+        "api_base": "",
+        "api_version": "2023-05-15",
+        "deployment_name": "",
+        "max_tokens": 100,
+        "temperature": 0.7,
+        "top_p": 1.0,
+        "presence_penalty": 0,
+        "frequency_penalty": 0,
+        "timeout": 30
+    },
+    "anthropic": {
+        "api_key": "",
+        "model": "claude-2",
+        "max_tokens": 100,
+        "temperature": 0.7,
+        "top_p": 1.0,
+        "api_base": "https://api.anthropic.com/v1",
+        "timeout": 30
+    },
+    "ollama": {
+        "api_base": "http://localhost:11434",
+        "model": "llama2",
+        "max_tokens": 100,
+        "temperature": 0.7,
+        "top_p": 1.0,
+        "timeout": 30
+    },
+    "openrouter": {
+        "api_key": "",
+        "model": "openai/gpt-3.5-turbo",
+        "max_tokens": 100,
+        "temperature": 0.7,
+        "top_p": 1.0,
+        "api_base": "https://openrouter.ai/api/v1",
+        "timeout": 30,
+        "route_prefix": ""
+    },
+    "local": {
+        "api_base": "http://localhost:8000",
+        "model": "ggml-model",
+        "max_tokens": 100,
+        "temperature": 0.7,
+        "timeout": 60
+    },
+    "custom": {
+        "api_key": "",
+        "api_base": "",
+        "model": "",
+        "max_tokens": 100,
+        "temperature": 0.7,
+        "headers": {},
+        "payload_template": {
+            "model": "{model}",
+            "messages": "{messages}",
+            "max_tokens": "{max_tokens}",
+            "temperature": "{temperature}"
+        },
+        "response_path": "choices[0].message.content",
+        "timeout": 30
+    },
+    "tag_generation": {
+        "prompt_template": "Generate {max_tags_per_card} concise tags for the following flashcard content, separating each tag with a comma:\n\nFront: {front}\nBack: {back}",
+        "include_field_names": true,
+        "exclude_fields": [
+            "Extra",
+            "Note ID",
+            "Tags"
+        ],
+        "use_cached_results": true,
+        "cache_duration_days": 7
+    },
+    "gemini": {
+        "api_key": "",
+        "model": "gemini-2.0-flash",
+        "max_tokens": 4096,
+        "temperature": 0.7,
+        "top_p": 1.0,
+        "api_base": "https://generativelanguage.googleapis.com/v1beta",
+        "timeout": 60
+    },
+    "perplexity": {
+        "api_key": "",
+        "model": "pplx-70b-online",
+        "max_tokens": 100,
+        "temperature": 0.7,
+        "top_p": 1.0,
+        "api_base": "https://api.perplexity.ai",
+        "timeout": 30
+    }
+}

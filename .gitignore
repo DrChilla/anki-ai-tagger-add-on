@@ -1,0 +1,47 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Logs
+logs/
+*.log
+
+# Mac OS specific files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Pytest
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# API and sensitive data
+# Exclude only the main config file with API keys, not the template
+/config.json
+/config.json.bak
+/*_config.json
+/config.*.json
+!config.template.json
+
+# Exclude meta.json which might contain addon metadata
+meta.json.bak

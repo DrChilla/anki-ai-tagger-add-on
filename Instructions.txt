@@ -1,0 +1,192 @@
+**Comprehensive Instructions for AI Tagger Add-On Development**
+
+**1. Add-On Structure & File System**  
+- **Base Path**: `/Users/jordonockey/Library/Application Support/Anki2/addons21/AI_Tagger`  
+- **Reference Add-On**: '/Users/jordonockey/Library/Application Support/Anki2/addons21/AI_Tagger/ReferenceAddOn' This reference add-on uses various APIs, which would be good reference, and you can copy code if you want. It also contains the current syntax and works anki and whatever Python anki uses. ⁠ 
+- **Required Structure**:
+  ```
+  AI_Tagger/
+  ├── __init__.py
+  ├── meta.json
+  ├── manifest.json
+  ├── config.py
+  ├── ai_tagger/
+  │   ├── service/
+  │   │   ├── openAICompatible.py (base)
+  │   │   ├── claude.py
+  │   │   ├── gemini.py
+  │   │   ├── openrouter.py
+  │   │   ├── perplexity.py
+  │   │   └── deepseek.py
+  │   ├── gui/
+  │   │   ├── main_dialog.py
+  │   │   ├── config_dialog.py
+  │   │   └── analysis_dialog.py
+  │   ├── utils/
+  │   │   ├── __init__.py
+  │   │   ├── constants.py
+  │   │   └── helpers.py
+  │   └── core/
+  │       ├── embed_deck.py
+  │       ├── learning_objectives.py
+  │       ├── select_cards.py
+  │       ├── tag_deck.py
+  │       └── analyze_cards.py
+  └── resources/
+      ├── icons/
+      └── docs/
+  ```
+
+**2. Critical Implementation Details**  
+- **meta.json Requirements**:
+  ```json
+  {
+    "package": "AI_Tagger",
+    "name": "AI Tagger Enhanced",
+    "conflicts": [],
+    "min_point_version": 49,
+    "max_point_version": 60,
+    "branch_index": 0
+  }
+  ```
+- **Service Module Pattern** (claude.py example):
+  ```python
+  from .openAICompatible import OpenAICompatibleService
+  from aqt.utils import showWarning
+
+  class ClaudeService(OpenAICompatibleService):
+      SERVICE_NAME = "Claude"
+      API_URL = "https://api.anthropic.com/v1/complete"
+      
+      def validate_config(self):
+          if not self.config.get("api_key"):
+              showWarning("Claude API key required", title="Config Error")
+              return False
+          return True
+  ```
+
+**3. Key Integration Points**  
+- **Menu Hook** (__init__.py):
+  ```python
+  from aqt import mw, gui_hooks
+  from .gui.main_dialog import show_main_wizard
+
+  def setup_menu():
+      action = QAction("AI Tagger", mw)
+      action.triggered.connect(show_main_wizard)
+      mw.form.menuTools.addAction(action)
+
+  gui_hooks.main_window_did_init.append(setup_menu)
+  ```
+
+**4. Configuration Management**  
+- **config.py Requirements**:
+  ```python
+  from aqt import mw
+  import json
+
+  class ConfigManager:
+      DEFAULT_CONFIG = {
+          "api_keys": {},
+          "endpoints": {},
+          "quality_threshold": 0.7
+      }
+
+      @classmethod
+      def get_config(cls):
+          return mw.addonManager.getConfig(__name__) or cls.DEFAULT_CONFIG
+  ```
+
+**5. Card Analysis Workflow**  
+- **Quality Check Implementation** (analyze_cards.py):
+  ```python
+  from anki.cards import Card
+  from aqt.utils import showInfo
+
+  class CardAnalyzer:
+      def assess_quality(self, card: Card) -> dict:
+          issues = []
+          if len(card.question()) < 10:
+              issues.append("Short question")
+          return {"score": 100 - len(issues)*20, "issues": issues}
+
+      def batch_analyze(self, deck_id: int):
+          # Implementation using mw.col.decks.get()
+          # Hook into Deck Browser via gui_hooks.deck_browser_will_render
+  ```
+
+**6. Error Handling Requirements**  
+- **Service Error Template**:
+  ```python
+  def handle_api_error(exc: Exception):
+      from aqt.utils import showWarning
+      error_msg = f"API Error: {str(exc)}"
+      showWarning(error_msg, title="Service Error")
+      log_to_file(error_msg)  # Implement in utils/helpers.py
+  ```
+
+**7. Testing Protocol**  
+1. Validate API key rotation works across all services  
+2. Test with 500+ card deck containing intentional flaws  
+3. Verify config persistence after Anki restart  
+4. Confirm error recovery mid-tagging workflow  
+5. Check resource usage with Anki's built-in performance monitor
+
+**8. Packaging Requirements**  
+- Include `_vendor/` directory for non-Anki dependencies  
+- Add `user_files/` directory for custom prompts  
+- Use pyinstaller for binary resources if needed  
+
+**Critical Path Notes**  
+1. All file operations must use `anki.paths` for cross-platform compatibility  
+2. GUI elements must inherit from `aqt.qt.QDialog`  
+3. Use `mw.taskman.run_in_background()` for long operations  
+4. Never use relative paths - always reference through `mw.addonManager.addonFolder()`  
+
+This structure directly addresses past issues with Python version conflicts by enforcing Anki's built-in Python environment and using the official add-on API. The explicit pathing prevents confusion between development and deployment environments.
+
+**COMPLETED TASKS**
+1. Created the basic directory structure for the add-on following the required structure
+2. Implemented the meta.json file with required configuration
+3. Created and implemented the core OpenAICompatibleService base class in openAICompatible.py
+4. Implemented two service adaptors:
+   - OpenAIService in openai.py - complete implementation with chat_completion(), embedding(), etc.
+   - ClaudeService in claude.py - Anthropic's Claude API implementation
+5. Created the ServiceFactory class using the Singleton pattern to manage service creation:
+   - Implemented create_service() method to instantiate services based on type
+   - Added get_service_for_config() utility method
+6. Implemented the ConfigManager class to handle configuration settings:
+   - Added DEFAULT_CONFIG with settings for different services
+   - Implemented config loading and saving functionality
+7. Created utility modules:
+   - constants.py with ServiceType enum and other constants
+   - helpers.py with utility functions like log_to_file()
+8. Updated ServiceType enum to use string values for better factory pattern integration
+9. Implemented the Tagger class for tag generation using AI services
+10. Added the basic menu hook in __init__.py
+11. Created the skeleton for main GUI dialog
+12. Updated the ServiceType enum to use "ANTHROPIC_CLAUDE" instead of "ANTHROPIC" for better readability
+13. Implemented the settings save functionality in the main_dialog.py to save API keys properly
+
+**NEXT STEPS**
+1. Implement additional service adaptors:
+   - gemini.py for Google's Gemini API
+   - openrouter.py for OpenRouter API
+   - perplexity.py for Perplexity API
+   - deepseek.py for Deepseek API
+2. Complete the GUI components:
+   - Finish main_dialog.py implementation with full UI elements
+   - Implement config_dialog.py for settings management
+   - Create analysis_dialog.py for card quality reporting
+3. Implement the AI Tagger's document analysis feature for analyzing various document types including PDF, PPT, TXT, and audio transcripts
+4. Implement core deck functionality:
+   - embed_deck.py for creating embeddings of deck content
+   - learning_objectives.py for extracting key learning points
+   - select_cards.py for intelligent card selection
+   - tag_deck.py for batch tagging operations
+   - analyze_cards.py for card quality analysis
+5. Add proper error handling and recovery mechanisms
+6. Create user documentation in resources/docs
+7. Implement testing protocol as outlined in section 7
+8. Package the add-on according to requirements in section 8
+9. Perform final testing and validation across different Anki versions

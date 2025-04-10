@@ -1,0 +1,12 @@
+# Document processing
+PyPDF2>=3.0.0
+python-pptx>=0.6.21
+
+# Audio processing
+SpeechRecognition>=3.10.0
+
+# API and networking
+requests>=2.28.0
+
+# AI Services
+anthropic>=0.4.0
